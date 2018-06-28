@@ -149,27 +149,35 @@ class PokerCard():
         return 0
 
     def compare_strength(self,cardsarray,handval):
+        tmp = []
+        tmp2 = []
+        for val in cardsarray[0]:
+            tmp.append(val[0])
+        tmp.sort()
+        for val in cardsarray[0]:
+            tmp2.append(val[0])
+        tmp2.sort()
+        
         if handval in [8,5,4]:
-            tmp = []
-            tmp2 = []
-            for val in cardsarray[0]:
-                tmp.append(val[0])
-            tmp.sort()
-            for val in cardsarray[0]:
-                tmp2.append(val[0])
-            tmp2.sort()
             if tmp[0] > tmp2[0]:
                 return (0,tmp)
             elif tmp[0] < tmp2[0]:
                 return (1,tmp2)
             return (-1,None)
+
         elif handval in [7,6,3]:
+            if handval == 7:
+                tmp_d = [x for x in set(tmp) if tmp.count(x) > 3]
+                tmp2_d = [x for x in set(tmp2) if tmp2.count(x) > 3]
+            if handval in [6,3]:
+                tmp_d = [x for x in set(tmp) if tmp.count(x) > 2]
+                tmp2_d = [x for x in set(tmp2) if tmp2.count(x) > 2]
+                
+            if tmp_d[0] > tmp2_d[0]:
+                return (0,tmp_d[0])
+            else :
+                return (1,tmp2_d[0])
 
-            return 
-
-
-        
-        
     
     def select_cards(self,cards):
         i = self.MAX_CARDS 
