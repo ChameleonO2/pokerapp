@@ -239,12 +239,12 @@ class PokerCard():
         for cards in cardsarray:
             handval = self.determine_hand(cards)
             if(maxhandval < handval):
-                max_handval = handval
+                maxhandval = handval
                 maxhandlist = []
                 maxhandlist.append(cards)
                 print("reset!=========================")
                 print(cards)
-            if(maxhandval == handval):
+            elif(maxhandval == handval):
                 maxhandlist.append(cards)
                 print(cards)
         print(maxhandlist)
