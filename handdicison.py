@@ -1,23 +1,60 @@
 import random
-from enum import Enum
+import re
 class PokerCard():
-    Marks = Enum('Marks', 'Spade Club Heart Dia')
+    MARK_LIST = ['Spade','Club','Heart','Dia']
     MAX_CARDS = 6
+    regex = r'[1-9,t,T,j,J,q,Q,k,K][s,S,c,C,h,H,d,D]'
+    pattern = ""
+    usecardlist=[]
+
     def __init__(self, ):
-        pass
+        self.pattern = re.compile(self.regex)
+        for i in range(52):
+            self.usecardlist.append(0)
+
+    def init_cardlist(self):
+        usecardlist=[]
+        for i in range(52):
+            self.usecardlist.append(False)
+
+    def add_cardlsit(self,num):
+        self.usecardlist[num] = True
 
     def disern_card(self, num):
         """
             与えられた数字を元にカードの値とマークを返す.
         """
-        return (num % 13 + 1, self.Marks(num // 13 + 1))
+        return (num % 13 + 1,self.MARK_LIST[num // 13])
 
     def inverse_card(self, card):
         """
             与えられたカードの値とマークを元にカードに割り当てた数字を返す.
         """
-        return (card[0] - 1) + (self.Marks(card[1]).value -1) * 13
+        for i in range(4):
+            if card[1] == self.MARK_LIST[i]:
+                return (card[0] - 1) + i * 13
 
+    def convert_cardinfo(self,str1):
+        """
+        [数字，マーク]のフォーマットで与えられた情報を数値として返す．
+        """
+        markstr1 = [['s','S'],['c','C'],['h','H'],['d','D']]
+
+        if str1[0] in ['t','T']:
+            tmp = 9
+        elif str1[0] in ['j','J']:
+            tmp = 10
+        elif str1[0] in ['q','Q']:
+            tmp = 11
+        elif str1[0] in ['k','K']:
+            tmp = 12
+        else:
+            tmp = int(str1[0]) - 1
+
+        for i , val in enumerate(markstr1):
+            if str1[1] in val:
+                tmp += i*13
+        return tmp
 
     def is_flash(self, cards):
         """
@@ -52,7 +89,6 @@ class PokerCard():
 
     def is_4curds(self, cards):
         """
-
             与えられたカードが4 of a kind ならばTrueを返す．.
         """
         tmp = []
@@ -177,6 +213,12 @@ class PokerCard():
                 return (0,tmp_d[0])
             else :
                 return (1,tmp2_d[0])
+        elif handval == 2:
+            return 0
+        elif handval == 1:
+            return 0
+        else:
+            return 0
 
     
     def select_cards(self,cards):
