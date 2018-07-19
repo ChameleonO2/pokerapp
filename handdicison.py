@@ -1,5 +1,6 @@
 import random
 import re
+import itertools
 class PokerCard():
     MARK_LIST = ['Spade','Club','Heart','Dia']
     MAX_CARDS = 6
@@ -10,10 +11,9 @@ class PokerCard():
     def __init__(self, ):
         self.pattern = re.compile(self.regex)
         for i in range(52):
-            self.usecardlist.append(0)
+            self.usecardlist.append(False)
 
     def init_cardlist(self):
-        usecardlist=[]
         for i in range(52):
             self.usecardlist.append(False)
 
@@ -184,53 +184,63 @@ class PokerCard():
             return 1
         return 0
 
-    def compare_strength(self,cardsarray,handval):
+    def output_kicker(self,cards,handval):
         tmp = []
-        tmp2 = []
-        for val in cardsarray[0]:
+        for val in cards:
             tmp.append(val[0])
         tmp.sort()
-        for val in cardsarray[0]:
-            tmp2.append(val[0])
-        tmp2.sort()
-        
+        tmp.reverse()
+        cards_tmp = tmp[:]
         if handval in [8,5,4]:
-            if tmp[0] > tmp2[0]:
-                return (0,tmp)
-            elif tmp[0] < tmp2[0]:
-                return (1,tmp2)
-            return (-1,None)
-
+            return tmp
         elif handval in [7,6,3]:
             if handval == 7:
                 tmp_d = [x for x in set(tmp) if tmp.count(x) > 3]
-                tmp2_d = [x for x in set(tmp2) if tmp2.count(x) > 3]
             if handval in [6,3]:
                 tmp_d = [x for x in set(tmp) if tmp.count(x) > 2]
-                tmp2_d = [x for x in set(tmp2) if tmp2.count(x) > 2]
-                
-            if tmp_d[0] > tmp2_d[0]:
-                return (0,tmp_d[0])
-            else :
-                return (1,tmp2_d[0])
+            cards_tmp = list(set(tmp))
+            cards_tmp.remove(tmp_d[0])
+            cards_tmp.sort()
+            cards_tmp.reverse()
+            tmp_d.extend(cards_tmp)
+            return tmp_d
         elif handval == 2:
-            return 0
+            tmp_d = [x for x in set(tmp) if tmp.count(x) > 1]
+            tmp_d.sort()
+            tmp_d.reverse()
+            cards_tmp = list(set(tmp))
+            for val in tmp_d:
+                cards_tmp.remove(val)
+            cards_tmp.sort()
+            cards_tmp.reverse()
+            tmp_d.extend(cards_tmp)
+            return tmp_d
         elif handval == 1:
-            return 0
+            tmp_d = [x for x in set(tmp) if tmp.count(x) > 1]
+            cards_tmp = list(set(tmp))
+            cards_tmp.remove(tmp_d[0])
+            cards_tmp.sort()
+            cards_tmp.reverse()
+            tmp_d.extend(cards_tmp)
+            return tmp_d
         else:
-            return 0
+            return tmp
+
+
+    def compare_strength(self,cardsarray,handval):
+        pass
 
     
     def select_cards(self,cards):
-        i = self.MAX_CARDS 
-        allpat = []
-        while 1 < i :
-            for j in range(i):
-                tmp = cards[:]
-                tmp.pop(self.MAX_CARDS - i)
-                tmp.pop(j)
-                allpat.append(tmp)
-            i -= 1
+        allpat = list(itertools.combinations(cards,5))
+        # i = self.MAX_CARDS 
+        # while 1 < i :
+        #     for j in range(i):
+        #         tmp = cards[:]
+        #         tmp.pop(self.MAX_CARDS - i)
+        #         tmp.pop(j)
+        #         allpat.append(tmp)
+        #     i -= 1
         return allpat
 
     def strength_hand(self,cardsarray):
@@ -242,13 +252,23 @@ class PokerCard():
                 maxhandval = handval
                 maxhandlist = []
                 maxhandlist.append(cards)
-                print("reset!=========================")
-                print(cards)
             elif(maxhandval == handval):
                 maxhandlist.append(cards)
-                print(cards)
-        print(maxhandlist)
-        return maxhandval
+        kickerlist=[]
+        for val in maxhandlist:
+            kickerlist.append(self.output_kicker(val,maxhandval))
+        
+        maxtmp = []
+        for num in range(len(kickerlist[0])):
+            maxnum=0
+            for i,val in enumerate(kickerlist):
+                if maxnum < val[num]:
+                    maxnum = val[num]
+                
+            maxtmp.append(maxnum)
+                    
+        return maxhandval,maxhandlist[kickerlist.index(maxtmp)]
+ 
     
 
 
