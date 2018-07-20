@@ -7,6 +7,10 @@ class PokerCard():
     regex = r'[1-9,t,T,j,J,q,Q,k,K][s,S,c,C,h,H,d,D]'
     pattern = ""
     usecardlist=[]
+    playercardlist = []
+    communitycardlist = []
+
+
 
     def __init__(self, ):
         self.pattern = re.compile(self.regex)
@@ -14,11 +18,19 @@ class PokerCard():
             self.usecardlist.append(False)
 
     def init_cardlist(self):
+        usecardlist=[]
+        playercardlist = []
+        communitycardlist = []
         for i in range(52):
             self.usecardlist.append(False)
 
     def add_cardlsit(self,num):
         self.usecardlist[num] = True
+
+    def set_communitycardlist(self,val):
+        pass
+        
+
 
     def disern_card(self, num):
         """
@@ -232,16 +244,7 @@ class PokerCard():
 
     
     def select_cards(self,cards):
-        allpat = list(itertools.combinations(cards,5))
-        # i = self.MAX_CARDS 
-        # while 1 < i :
-        #     for j in range(i):
-        #         tmp = cards[:]
-        #         tmp.pop(self.MAX_CARDS - i)
-        #         tmp.pop(j)
-        #         allpat.append(tmp)
-        #     i -= 1
-        return allpat
+        return  list(itertools.combinations(cards,5))
 
     def strength_hand(self,cardsarray):
         maxhandval = 0
