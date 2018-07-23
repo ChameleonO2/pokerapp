@@ -10,8 +10,6 @@ class PokerCard():
     playercardlist = []
     communitycardlist = []
 
-
-
     def __init__(self, ):
         self.pattern = re.compile(self.regex)
         for i in range(52):
@@ -26,11 +24,26 @@ class PokerCard():
 
     def add_cardlsit(self,num):
         self.usecardlist[num] = True
+        return num
 
-    def set_communitycardlist(self,val):
-        pass
+    def set_communitycardlist(self,num):
+        if (len(self.communitycardlist) <= 5):
+            self.communitycardlist.append(self.disern_card(num))
+            self.add_cardlsit(num)
+            return
+        else:
+            print("規定値以上です")
+            return 
         
-
+    def set_playercardlist(self,num):
+        if (len(self.playercardlist) <= 2):
+            self.playercardlist.append(self.disern_card(num))
+            self.add_cardlsit(num)
+            return
+        else:
+            print("規定値以上です")
+            return 
+        
 
     def disern_card(self, num):
         """
