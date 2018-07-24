@@ -69,9 +69,7 @@ class PokerCard():
 
     def get_hand(self,cards):
         tmp = list(self.get_communitycardlist())
-        print(tmp)
         tmp.extend(cards)
-        print(tmp)
         handval,hand = self.strength_hand(self.select_cards(tmp))
         kicker = self.output_kicker(hand,handval)
         return hand,handval,kicker
@@ -289,15 +287,19 @@ class PokerCard():
             return tmp
 
 
-    def compare_strength(self,cardsarray,handval):
-        pass
+    def compare_strength(self,handval1,handval2):
+        for i in range(len(handval1)):
+            if handval1[i] > handval2[i]:
+                return 0
+            elif handval1[i] < handval2[i]:
+                return 1
+        return 2
 
     
     def select_cards(self,cards):
         return  list(itertools.combinations(cards,5))
 
     def strength_hand(self,cardsarray):
-        print("strength-----------")
         maxhandval = 0
         maxhandlist=[]
         for cards in cardsarray:
@@ -311,21 +313,20 @@ class PokerCard():
         kickerlist=[]
         for val in maxhandlist:
             kickerlist.append(self.output_kicker(val,maxhandval))
-        
         maxtmp = []
+        memkicklist = [] 
+        for i in range(len(kickerlist)):
+            memkicklist.append(True)
         for num in range(len(kickerlist[0])):
             maxnum=0
             for i,val in enumerate(kickerlist):
-                if maxnum < val[num]:
+                if memkicklist[i] and maxnum < val[num]:
                     maxnum = val[num]
-                
-            maxtmp.append(maxnum)
-        print(maxhandval)
-        print(kickerlist.index(maxtmp))
-        print(maxhandlist[kickerlist.index(maxtmp)])
-        print(maxtmp)
-        print("--------------------------")
-        return maxhandval,maxhandlist[kickerlist.index(maxtmp)]
+            for i,val in enumerate(kickerlist):
+                if memkicklist[i] and val[num] < maxnum:
+                    memkicklist[i] = False
+        maxtmp = memkicklist.index(True)
+        return maxhandval,maxhandlist[maxtmp]
  
     
 
@@ -336,20 +337,6 @@ if __name__ == '__main__':
     print("debug handdicison")
     tmp = []
     card = [] 
-    # for i in range(52):
-    #     card.append(False)
-    # for i in range(5):
-    #     t = random.randrange(52)
-    #     while card[t] != False:
-    #         t = random.randrange(52)
-    #     card[t] = True 
-    #     hoge.set_communitycardlist(t)
-    # for i in range(2):
-    #     t = random.randrange(52)
-    #     while card[t] != False:
-    #         t = random.randrange(52)
-    #     card[t] = True 
-    #     hoge.set_playercardlist(t)
 
     hoge.set_communitycardlist(43)
     hoge.set_communitycardlist(32)
@@ -359,16 +346,6 @@ if __name__ == '__main__':
 
     hoge.set_playercardlist(34)
     hoge.set_playercardlist(11)
-    test = []
-    test.append(hoge.disern_card(43))
-    test.append(hoge.disern_card(32))
-    test.append(hoge.disern_card(50))
-    test.append(hoge.disern_card(17))
-    test.append(hoge.disern_card(6))
-
-    testlist = ((5, 'Dia'), (7, 'Heart'), (12, 'Dia'), (5, 'Club'), (7, 'Spade'))
-    print(hoge.determine_hand(testlist))
-    print(hoge.determine_hand(test))
 
     print(hoge.get_communitycardlist())
     print(hoge.get_playercardlist())
@@ -378,24 +355,23 @@ if __name__ == '__main__':
     wincnt = 0
     losecnt = 0
     samecnt = 0
-    print(hoge.get_communitycardlist())
+    print(phand)
     for val in tmpcard: 
-        print(val)
         ehand,ehandval,ekicker = hoge.get_hand(val)
-        # print(ehand)
-        # if phandval > ehandval:
-        #     wincnt += 1
-        # elif phandval < ehandval:
-        #     losecnt += 1
-        # else:
-        #     samecnt += 1
+        if phandval > ehandval:
+            wincnt += 1
+        elif phandval < ehandval:
+            losecnt += 1
+        else:
+            st = hoge.compare_strength(pkicker,ekicker)
+            if st == 0:
+                wincnt += 1
+            elif st == 1:
+                losecnt += 1
+            else:
+                samecnt += 1
     
     print((wincnt,losecnt,samecnt))
+    print(wincnt/(wincnt+losecnt+samecnt)*100)
     
 
-    # print(hoge.put_cardlist())
-
-    # print(tmp)
-    # print(hoge.strength_hand(hoge.select_cards(tmp)))
-    # for val in hoge.select_cards(tmp):
-    #     print(val)
