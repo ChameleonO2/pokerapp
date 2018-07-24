@@ -337,6 +337,13 @@ if __name__ == '__main__':
     print("debug handdicison")
     tmp = []
     card = [] 
+    print("あなたのハンドを入力してください")
+    playdata = []
+    while(len(playdata) != 2):
+        playdata = input().split()
+
+    while(len(playdata) != 5):
+        playdata = input().split()
 
     hoge.set_communitycardlist(43)
     hoge.set_communitycardlist(32)
