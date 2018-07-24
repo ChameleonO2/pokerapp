@@ -34,6 +34,9 @@ class PokerCard():
         else:
             print("規定値以上です")
             return 
+    
+    def get_communitycardlist(self,):
+        return self.communitycardlist[:]
         
     def set_playercardlist(self,num):
         if (len(self.playercardlist) <= 2):
@@ -43,7 +46,33 @@ class PokerCard():
         else:
             print("規定値以上です")
             return 
+    
+    def get_playercardlist(self,):
+        return self.playercardlist[:]
         
+    def put_2cardlist(self,):
+        """
+        現在使用していないカード2枚の組み合わせを出力する．
+        """
+        tmp = []
+        for i,val in enumerate(self.usecardlist):
+            if not val:
+                tmp.append(self.disern_card(i))
+        
+        return list(itertools.combinations(tmp,2))
+
+    def get_hand(self,cards):
+        tmp = self.get_communitycardlist()
+        tmp.extend(cards)
+        handval,hand = self.strength_hand(self.select_cards(tmp))
+        kicker = self.output_kicker(hand,handval)
+        return hand,handval,kicker
+
+    def get_playerhand(self,):
+        return self.get_hand(self.get_playercardlist())
+    
+
+
 
     def disern_card(self, num):
         """
@@ -296,13 +325,26 @@ if __name__ == '__main__':
     card = [] 
     for i in range(52):
         card.append(False)
-    for i in range(7):
+    for i in range(5):
         t = random.randrange(52)
         while card[t] != False:
             t = random.randrange(52)
         card[t] = True 
-        tmp.append(hoge.disern_card(t))
-    print(tmp)
-    print(hoge.strength_hand(hoge.select_cards(tmp)))
+        hoge.set_communitycardlist(t)
+    for i in range(2):
+        t = random.randrange(52)
+        while card[t] != False:
+            t = random.randrange(52)
+        card[t] = True 
+        hoge.set_playercardlist(t)
+
+    print(hoge.get_communitycardlist())
+    print(hoge.get_playercardlist())
+    print(hoge.get_playerhand())
+
+    # print(hoge.put_cardlist())
+
+    # print(tmp)
+    # print(hoge.strength_hand(hoge.select_cards(tmp)))
     # for val in hoge.select_cards(tmp):
     #     print(val)
