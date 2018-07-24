@@ -54,16 +54,24 @@ class PokerCard():
         """
         現在使用していないカード2枚の組み合わせを出力する．
         """
+        print("put_2cardlist")
         tmp = []
+        cnt = 0
         for i,val in enumerate(self.usecardlist):
-            if not val:
+            # print(i)
+            if val == False:
                 tmp.append(self.disern_card(i))
-        
+            else:
+                # print(self.disern_card(i))
+                cnt+=1
+        # print("cnt",cnt) 
         return list(itertools.combinations(tmp,2))
 
     def get_hand(self,cards):
-        tmp = self.get_communitycardlist()
+        tmp = list(self.get_communitycardlist())
+        print(tmp)
         tmp.extend(cards)
+        print(tmp)
         handval,hand = self.strength_hand(self.select_cards(tmp))
         kicker = self.output_kicker(hand,handval)
         return hand,handval,kicker
@@ -90,7 +98,7 @@ class PokerCard():
 
     def convert_cardinfo(self,str1):
         """
-        [数字，マーク]のフォーマットで与えられた情報を数値として返す．
+            [数字，マーク]のフォーマットで与えられた情報を数値として返す．
         """
         markstr1 = [['s','S'],['c','C'],['h','H'],['d','D']]
 
@@ -289,6 +297,7 @@ class PokerCard():
         return  list(itertools.combinations(cards,5))
 
     def strength_hand(self,cardsarray):
+        print("strength-----------")
         maxhandval = 0
         maxhandlist=[]
         for cards in cardsarray:
@@ -311,7 +320,11 @@ class PokerCard():
                     maxnum = val[num]
                 
             maxtmp.append(maxnum)
-                    
+        print(maxhandval)
+        print(kickerlist.index(maxtmp))
+        print(maxhandlist[kickerlist.index(maxtmp)])
+        print(maxtmp)
+        print("--------------------------")
         return maxhandval,maxhandlist[kickerlist.index(maxtmp)]
  
     
@@ -323,24 +336,62 @@ if __name__ == '__main__':
     print("debug handdicison")
     tmp = []
     card = [] 
-    for i in range(52):
-        card.append(False)
-    for i in range(5):
-        t = random.randrange(52)
-        while card[t] != False:
-            t = random.randrange(52)
-        card[t] = True 
-        hoge.set_communitycardlist(t)
-    for i in range(2):
-        t = random.randrange(52)
-        while card[t] != False:
-            t = random.randrange(52)
-        card[t] = True 
-        hoge.set_playercardlist(t)
+    # for i in range(52):
+    #     card.append(False)
+    # for i in range(5):
+    #     t = random.randrange(52)
+    #     while card[t] != False:
+    #         t = random.randrange(52)
+    #     card[t] = True 
+    #     hoge.set_communitycardlist(t)
+    # for i in range(2):
+    #     t = random.randrange(52)
+    #     while card[t] != False:
+    #         t = random.randrange(52)
+    #     card[t] = True 
+    #     hoge.set_playercardlist(t)
+
+    hoge.set_communitycardlist(43)
+    hoge.set_communitycardlist(32)
+    hoge.set_communitycardlist(50)
+    hoge.set_communitycardlist(22)
+    hoge.set_communitycardlist(17)
+
+    hoge.set_playercardlist(34)
+    hoge.set_playercardlist(11)
+    test = []
+    test.append(hoge.disern_card(43))
+    test.append(hoge.disern_card(32))
+    test.append(hoge.disern_card(50))
+    test.append(hoge.disern_card(17))
+    test.append(hoge.disern_card(6))
+
+    testlist = ((5, 'Dia'), (7, 'Heart'), (12, 'Dia'), (5, 'Club'), (7, 'Spade'))
+    print(hoge.determine_hand(testlist))
+    print(hoge.determine_hand(test))
 
     print(hoge.get_communitycardlist())
     print(hoge.get_playercardlist())
-    print(hoge.get_playerhand())
+    print("------------")
+    phand,phandval,pkicker = hoge.get_playerhand()
+    tmpcard = hoge.put_2cardlist()
+    wincnt = 0
+    losecnt = 0
+    samecnt = 0
+    print(hoge.get_communitycardlist())
+    for val in tmpcard: 
+        print(val)
+        ehand,ehandval,ekicker = hoge.get_hand(val)
+        # print(ehand)
+        # if phandval > ehandval:
+        #     wincnt += 1
+        # elif phandval < ehandval:
+        #     losecnt += 1
+        # else:
+        #     samecnt += 1
+    
+    print((wincnt,losecnt,samecnt))
+    
 
     # print(hoge.put_cardlist())
 
