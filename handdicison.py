@@ -1,6 +1,7 @@
 import random
 import re
 import itertools
+from tqdm import tqdm
 class PokerCard():
     MARK_LIST = ['Spade','Club','Heart','Dia']
     MAX_CARDS = 6
@@ -54,17 +55,13 @@ class PokerCard():
         """
         現在使用していないカード2枚の組み合わせを出力する．
         """
-        print("put_2cardlist")
         tmp = []
         cnt = 0
         for i,val in enumerate(self.usecardlist):
-            # print(i)
             if val == False:
                 tmp.append(self.disern_card(i))
             else:
-                # print(self.disern_card(i))
                 cnt+=1
-        # print("cnt",cnt) 
         return list(itertools.combinations(tmp,2))
 
     def get_hand(self,cards):
@@ -243,6 +240,28 @@ class PokerCard():
         if self.is_1pair(cards):
             return 1
         return 0
+    
+    def  show_handname(self,handval):
+        if handval == 0:
+            return "High Cards"
+        elif handval == 1:
+            return "One Pair"
+        elif handval == 2:
+            return "Two Pair"
+        elif handval == 3:
+            return "Three of a Kind"
+        elif handval == 4:
+            return "Straight"
+        elif handval == 5:
+            return "Flush"
+        elif handval == 6:
+            return "Full House"
+        elif handval == 7:
+            return "Four of a Kind"
+        elif handval == 8:
+            return "Straight Flush"
+        return "error"
+
 
     def output_kicker(self,cards,handval):
         tmp = []
@@ -330,8 +349,6 @@ class PokerCard():
  
     
 
-
-
 if __name__ == '__main__':
     hoge = PokerCard()
     print("debug handdicison")
@@ -341,18 +358,15 @@ if __name__ == '__main__':
     playdata = []
     while(len(playdata) != 2):
         playdata = input().split()
-
+    
+    for val in playdata:
+        hoge.set_playercardlist(hoge.convert_cardinfo(val))
+        
+    print("コミュニティカードを入力してください")
     while(len(playdata) != 5):
         playdata = input().split()
-
-    hoge.set_communitycardlist(43)
-    hoge.set_communitycardlist(32)
-    hoge.set_communitycardlist(50)
-    hoge.set_communitycardlist(22)
-    hoge.set_communitycardlist(17)
-
-    hoge.set_playercardlist(34)
-    hoge.set_playercardlist(11)
+    for val in playdata:
+        hoge.set_communitycardlist(hoge.convert_cardinfo(val))
 
     print(hoge.get_communitycardlist())
     print(hoge.get_playercardlist())
@@ -362,7 +376,11 @@ if __name__ == '__main__':
     wincnt = 0
     losecnt = 0
     samecnt = 0
+    print("あなたの役")
     print(phand)
+    print(hoge.show_handname(phandval))
+
+    pbar = tqdm(total = 990)
     for val in tmpcard: 
         ehand,ehandval,ekicker = hoge.get_hand(val)
         if phandval > ehandval:
@@ -377,8 +395,11 @@ if __name__ == '__main__':
                 losecnt += 1
             else:
                 samecnt += 1
+        pbar.update(1)
+    pbar.close()
     
-    print((wincnt,losecnt,samecnt))
+    # print((wincnt,losecnt,samecnt))
+    print("勝率")
     print(wincnt/(wincnt+losecnt+samecnt)*100)
     
 
