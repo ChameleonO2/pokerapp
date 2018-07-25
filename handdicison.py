@@ -17,11 +17,14 @@ class PokerCard():
             self.usecardlist.append(False)
 
     def init_cardlist(self):
-        usecardlist=[]
-        playercardlist = []
-        communitycardlist = []
+        self.usecardlist=[]
+        self.playercardlist = []
+        self.communitycardlist = []
         for i in range(52):
             self.usecardlist.append(False)
+
+    def get_usecardlist(self,):
+        return self.usecardlist[:]
 
     def add_cardlsit(self,num):
         self.usecardlist[num] = True
@@ -130,6 +133,8 @@ class PokerCard():
         for val in cards:
             tmp.append(val[0])
         tmp.sort()
+        if tmp == [1, 10, 11, 12, 13]:
+            return True 
         for i in range(1,len(tmp)):
             if not(tmp[i-1]+1 == tmp[i]):
                 return False
@@ -268,8 +273,16 @@ class PokerCard():
         for val in cards:
             tmp.append(val[0])
         tmp.sort()
+        if tmp == [1, 2, 3, 4, 5]:
+            return tmp
+        for i, val in enumerate(tmp):
+            if val == 1:
+                tmp[i] =14
+
+        tmp.sort()
         tmp.reverse()
         cards_tmp = tmp[:]
+        
         if handval in [8,5,4]:
             return tmp
         elif handval in [7,6,3]:
@@ -349,9 +362,9 @@ class PokerCard():
  
     
 
-if __name__ == '__main__':
+    
+def river():
     hoge = PokerCard()
-    print("debug handdicison")
     tmp = []
     card = [] 
     print("あなたのハンドを入力してください")
@@ -401,5 +414,74 @@ if __name__ == '__main__':
     # print((wincnt,losecnt,samecnt))
     print("勝率")
     print(wincnt/(wincnt+losecnt+samecnt)*100)
-    
 
+def pturn():
+    hoge = PokerCard()
+    print("あなたのハンドを入力してください")
+    playdata = []
+    playdata2 = []
+    while(len(playdata) != 2):
+        playdata = input().split()
+    
+    print("コミュニティカードを入力してください")
+    
+    playdata2 = input().split()
+    while (len(playdata2) > 5):
+        print("コミュニティカードを入力してください")
+        playdata2 = input().split()
+
+
+    tmp = []
+    uses = hoge.get_usecardlist()
+
+    for i,val in enumerate(uses):
+        if val == False:
+            tmp.append(i)
+    tmp2 = list(itertools.combinations(tmp,5-len(playdata2)))
+
+    wincnt = 0
+    losecnt = 0
+    samecnt = 0
+    handcnt = [0,0,0,0,0,0,0,0]
+    pbar = tqdm(total = len(tmp2))
+    for val in tmp2:
+        hoge.init_cardlist()
+
+        for val2 in playdata:
+            hoge.set_playercardlist(hoge.convert_cardinfo(val2))
+        for val2 in playdata2:
+            hoge.set_communitycardlist(hoge.convert_cardinfo(val2))
+        for val2 in val:
+            print(val2)
+            hoge.set_communitycardlist(val2)
+        print(hoge.get_playercardlist())
+        print(hoge.get_communitycardlist())
+
+        phand,phandval,pkicker = hoge.get_playerhand()
+
+        tmpcard = hoge.put_2cardlist()
+        handcnt[phandval]+=1 
+        for val in tmpcard: 
+            ehand,ehandval,ekicker = hoge.get_hand(val)
+            if phandval > ehandval:
+                wincnt += 1
+            elif phandval < ehandval:
+                losecnt += 1
+            else:
+                st = hoge.compare_strength(pkicker,ekicker)
+                if st == 0:
+                    wincnt += 1
+                elif st == 1:
+                    losecnt += 1
+                else:
+                    samecnt += 1
+    
+        pbar.update(1)
+    pbar.close()
+    print("勝率")
+    print(wincnt/(wincnt+losecnt+samecnt)*100)
+    print(handcnt)
+
+if __name__ == '__main__':
+    # river()
+    pturn()
