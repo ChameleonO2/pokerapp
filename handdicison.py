@@ -430,6 +430,10 @@ def pturn():
         print("コミュニティカードを入力してください")
         playdata2 = input().split()
 
+    for val2 in playdata:
+        hoge.set_playercardlist(hoge.convert_cardinfo(val2))
+    for val2 in playdata2:
+        hoge.set_communitycardlist(hoge.convert_cardinfo(val2))
 
     tmp = []
     uses = hoge.get_usecardlist()
@@ -442,21 +446,16 @@ def pturn():
     wincnt = 0
     losecnt = 0
     samecnt = 0
-    handcnt = [0,0,0,0,0,0,0,0]
-    pbar = tqdm(total = len(tmp2))
+    handcnt = [0,0,0,0,0,0,0,0,0]
+    pbar = tqdm(total = len(tmp2)*990)
     for val in tmp2:
         hoge.init_cardlist()
-
         for val2 in playdata:
             hoge.set_playercardlist(hoge.convert_cardinfo(val2))
         for val2 in playdata2:
             hoge.set_communitycardlist(hoge.convert_cardinfo(val2))
         for val2 in val:
-            print(val2)
             hoge.set_communitycardlist(val2)
-        print(hoge.get_playercardlist())
-        print(hoge.get_communitycardlist())
-
         phand,phandval,pkicker = hoge.get_playerhand()
 
         tmpcard = hoge.put_2cardlist()
@@ -475,13 +474,18 @@ def pturn():
                     losecnt += 1
                 else:
                     samecnt += 1
+            pbar.update(1)
     
-        pbar.update(1)
     pbar.close()
     print("勝率")
     print(wincnt/(wincnt+losecnt+samecnt)*100)
-    print(handcnt)
+    total = 0
+    for num in handcnt:
+        total += num
 
+    for i, num in enumerate(handcnt):
+        print(hoge.show_handname(i))
+        print((num/total) *100)
 if __name__ == '__main__':
     # river()
     pturn()
