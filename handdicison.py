@@ -1,23 +1,120 @@
 import random
-from enum import Enum
+import re
+import itertools
+from tqdm import tqdm
 class PokerCard():
-    Marks = Enum('Marks', 'Spade Club Heart Dia')
+    MARK_LIST = ['Spade','Club','Heart','Dia']
     MAX_CARDS = 6
+    regex = r'[1-9,t,T,j,J,q,Q,k,K][s,S,c,C,h,H,d,D]'
+    pattern = ""
+    usecardlist=[]
+    playercardlist = []
+    communitycardlist = []
+
     def __init__(self, ):
-        pass
+        self.pattern = re.compile(self.regex)
+        for i in range(52):
+            self.usecardlist.append(False)
+
+    def init_cardlist(self):
+        self.usecardlist=[]
+        self.playercardlist = []
+        self.communitycardlist = []
+        for i in range(52):
+            self.usecardlist.append(False)
+
+    def get_usecardlist(self,):
+        return self.usecardlist[:]
+
+    def add_cardlsit(self,num):
+        self.usecardlist[num] = True
+        return num
+
+    def set_communitycardlist(self,num):
+        if (len(self.communitycardlist) <= 5):
+            self.communitycardlist.append(self.disern_card(num))
+            self.add_cardlsit(num)
+            return
+        else:
+            print("規定値以上です")
+            return 
+    
+    def get_communitycardlist(self,):
+        return self.communitycardlist[:]
+        
+    def set_playercardlist(self,num):
+        if (len(self.playercardlist) <= 2):
+            self.playercardlist.append(self.disern_card(num))
+            self.add_cardlsit(num)
+            return
+        else:
+            print("規定値以上です")
+            return 
+    
+    def get_playercardlist(self,):
+        return self.playercardlist[:]
+        
+    def put_2cardlist(self,):
+        """
+        現在使用していないカード2枚の組み合わせを出力する．
+        """
+        tmp = []
+        cnt = 0
+        for i,val in enumerate(self.usecardlist):
+            if val == False:
+                tmp.append(self.disern_card(i))
+            else:
+                cnt+=1
+        return list(itertools.combinations(tmp,2))
+
+    def get_hand(self,cards):
+        tmp = list(self.get_communitycardlist())
+        tmp.extend(cards)
+        handval,hand = self.strength_hand(self.select_cards(tmp))
+        kicker = self.output_kicker(hand,handval)
+        return hand,handval,kicker
+
+    def get_playerhand(self,):
+        return self.get_hand(self.get_playercardlist())
+    
+
+
 
     def disern_card(self, num):
         """
             与えられた数字を元にカードの値とマークを返す.
         """
-        return (num % 13 + 1, self.Marks(num // 13 + 1))
+        return (num % 13 + 1,self.MARK_LIST[num // 13])
 
     def inverse_card(self, card):
         """
             与えられたカードの値とマークを元にカードに割り当てた数字を返す.
         """
-        return (card[0] - 1) + (self.Marks(card[1]).value -1) * 13
+        for i in range(4):
+            if card[1] == self.MARK_LIST[i]:
+                return (card[0] - 1) + i * 13
 
+    def convert_cardinfo(self,str1):
+        """
+            [数字，マーク]のフォーマットで与えられた情報を数値として返す．
+        """
+        markstr1 = [['s','S'],['c','C'],['h','H'],['d','D']]
+
+        if str1[0] in ['t','T']:
+            tmp = 9
+        elif str1[0] in ['j','J']:
+            tmp = 10
+        elif str1[0] in ['q','Q']:
+            tmp = 11
+        elif str1[0] in ['k','K']:
+            tmp = 12
+        else:
+            tmp = int(str1[0]) - 1
+
+        for i , val in enumerate(markstr1):
+            if str1[1] in val:
+                tmp += i*13
+        return tmp
 
     def is_flash(self, cards):
         """
@@ -36,6 +133,8 @@ class PokerCard():
         for val in cards:
             tmp.append(val[0])
         tmp.sort()
+        if tmp == [1, 10, 11, 12, 13]:
+            return True 
         for i in range(1,len(tmp)):
             if not(tmp[i-1]+1 == tmp[i]):
                 return False
@@ -52,7 +151,6 @@ class PokerCard():
 
     def is_4curds(self, cards):
         """
-
             与えられたカードが4 of a kind ならばTrueを返す．.
         """
         tmp = []
@@ -147,41 +245,91 @@ class PokerCard():
         if self.is_1pair(cards):
             return 1
         return 0
+    
+    def  show_handname(self,handval):
+        if handval == 0:
+            return "High Cards"
+        elif handval == 1:
+            return "One Pair"
+        elif handval == 2:
+            return "Two Pair"
+        elif handval == 3:
+            return "Three of a Kind"
+        elif handval == 4:
+            return "Straight"
+        elif handval == 5:
+            return "Flush"
+        elif handval == 6:
+            return "Full House"
+        elif handval == 7:
+            return "Four of a Kind"
+        elif handval == 8:
+            return "Straight Flush"
+        return "error"
 
-    def compare_strength(self,cardsarray,handval):
+
+    def output_kicker(self,cards,handval):
+        tmp = []
+        for val in cards:
+            tmp.append(val[0])
+        tmp.sort()
+        if tmp == [1, 2, 3, 4, 5]:
+            return tmp
+        for i, val in enumerate(tmp):
+            if val == 1:
+                tmp[i] =14
+
+        tmp.sort()
+        tmp.reverse()
+        cards_tmp = tmp[:]
+        
         if handval in [8,5,4]:
-            tmp = []
-            tmp2 = []
-            for val in cardsarray[0]:
-                tmp.append(val[0])
-            tmp.sort()
-            for val in cardsarray[0]:
-                tmp2.append(val[0])
-            tmp2.sort()
-            if tmp[0] > tmp2[0]:
-                return (0,tmp)
-            elif tmp[0] < tmp2[0]:
-                return (1,tmp2)
-            return (-1,None)
+            return tmp
         elif handval in [7,6,3]:
+            if handval == 7:
+                tmp_d = [x for x in set(tmp) if tmp.count(x) > 3]
+            if handval in [6,3]:
+                tmp_d = [x for x in set(tmp) if tmp.count(x) > 2]
+            cards_tmp = list(set(tmp))
+            cards_tmp.remove(tmp_d[0])
+            cards_tmp.sort()
+            cards_tmp.reverse()
+            tmp_d.extend(cards_tmp)
+            return tmp_d
+        elif handval == 2:
+            tmp_d = [x for x in set(tmp) if tmp.count(x) > 1]
+            tmp_d.sort()
+            tmp_d.reverse()
+            cards_tmp = list(set(tmp))
+            for val in tmp_d:
+                cards_tmp.remove(val)
+            cards_tmp.sort()
+            cards_tmp.reverse()
+            tmp_d.extend(cards_tmp)
+            return tmp_d
+        elif handval == 1:
+            tmp_d = [x for x in set(tmp) if tmp.count(x) > 1]
+            cards_tmp = list(set(tmp))
+            cards_tmp.remove(tmp_d[0])
+            cards_tmp.sort()
+            cards_tmp.reverse()
+            tmp_d.extend(cards_tmp)
+            return tmp_d
+        else:
+            return tmp
 
-            return 
 
+    def compare_strength(self,handval1,handval2):
+        for i in range(len(handval1)):
+            if handval1[i] > handval2[i]:
+                return 0
+            elif handval1[i] < handval2[i]:
+                return 1
+        return 2
 
-        
-        
     
     def select_cards(self,cards):
-        i = self.MAX_CARDS 
-        allpat = []
-        while 1 < i :
-            for j in range(i):
-                tmp = cards[:]
-                tmp.pop(self.MAX_CARDS - i)
-                tmp.pop(j)
-                allpat.append(tmp)
-            i -= 1
-        return allpat
+        return  list(itertools.combinations(cards,5))
 
     def strength_hand(self,cardsarray):
         maxhandval = 0
@@ -189,34 +337,102 @@ class PokerCard():
         for cards in cardsarray:
             handval = self.determine_hand(cards)
             if(maxhandval < handval):
-                max_handval = handval
+                maxhandval = handval
                 maxhandlist = []
                 maxhandlist.append(cards)
-                print("reset!=========================")
-                print(cards)
-            if(maxhandval == handval):
+            elif(maxhandval == handval):
                 maxhandlist.append(cards)
-                print(cards)
-        print(maxhandlist)
-        return maxhandval
+        kickerlist=[]
+        for val in maxhandlist:
+            kickerlist.append(self.output_kicker(val,maxhandval))
+        maxtmp = []
+        memkicklist = [] 
+        for i in range(len(kickerlist)):
+            memkicklist.append(True)
+        for num in range(len(kickerlist[0])):
+            maxnum=0
+            for i,val in enumerate(kickerlist):
+                if memkicklist[i] and maxnum < val[num]:
+                    maxnum = val[num]
+            for i,val in enumerate(kickerlist):
+                if memkicklist[i] and val[num] < maxnum:
+                    memkicklist[i] = False
+        maxtmp = memkicklist.index(True)
+        return maxhandval,maxhandlist[maxtmp]
+ 
     
 
-
-
-if __name__ == '__main__':
+def pturn():
     hoge = PokerCard()
-    print("debug handdicison")
+    print("あなたのハンドを入力してください")
+    playdata = []
+    playdata2 = []
+    while(len(playdata) != 2):
+        playdata = input().split()
+    
+    print("コミュニティカードを入力してください")
+    
+    playdata2 = input().split()
+    while (len(playdata2) > 5):
+        print("コミュニティカードを入力してください")
+        playdata2 = input().split()
+
+    for val2 in playdata:
+        hoge.set_playercardlist(hoge.convert_cardinfo(val2))
+    for val2 in playdata2:
+        hoge.set_communitycardlist(hoge.convert_cardinfo(val2))
+
     tmp = []
-    card = [] 
-    for i in range(52):
-        card.append(False)
-    for i in range(7):
-        t = random.randrange(52)
-        while card[t] != False:
-            t = random.randrange(52)
-        card[t] = True 
-        tmp.append(hoge.disern_card(t))
-    print(tmp)
-    print(hoge.strength_hand(hoge.select_cards(tmp)))
-    # for val in hoge.select_cards(tmp):
-    #     print(val)
+    uses = hoge.get_usecardlist()
+
+    for i,val in enumerate(uses):
+        if val == False:
+            tmp.append(i)
+    tmp2 = list(itertools.combinations(tmp,5-len(playdata2)))
+
+    wincnt = 0
+    losecnt = 0
+    samecnt = 0
+    handcnt = [0,0,0,0,0,0,0,0,0]
+    pbar = tqdm(total = len(tmp2)*990)
+    for val in tmp2:
+        hoge.init_cardlist()
+        for val2 in playdata:
+            hoge.set_playercardlist(hoge.convert_cardinfo(val2))
+        for val2 in playdata2:
+            hoge.set_communitycardlist(hoge.convert_cardinfo(val2))
+        for val2 in val:
+            hoge.set_communitycardlist(val2)
+        phand,phandval,pkicker = hoge.get_playerhand()
+
+        tmpcard = hoge.put_2cardlist()
+        handcnt[phandval]+=1 
+        for val in tmpcard: 
+            ehand,ehandval,ekicker = hoge.get_hand(val)
+            if phandval > ehandval:
+                wincnt += 1
+            elif phandval < ehandval:
+                losecnt += 1
+            else:
+                st = hoge.compare_strength(pkicker,ekicker)
+                if st == 0:
+                    wincnt += 1
+                elif st == 1:
+                    losecnt += 1
+                else:
+                    samecnt += 1
+            pbar.update(1)
+    
+    pbar.close()
+    print("勝率")
+    print(wincnt/(wincnt+losecnt+samecnt)*100)
+    total = 0
+    for num in handcnt:
+        total += num
+
+    for i, num in enumerate(handcnt):
+        print(hoge.show_handname(i))
+        print((num/total) *100)
+if __name__ == '__main__':
+    # river()
+    pturn()
