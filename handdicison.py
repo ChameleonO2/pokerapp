@@ -362,59 +362,6 @@ class PokerCard():
  
     
 
-    
-def river():
-    hoge = PokerCard()
-    tmp = []
-    card = [] 
-    print("あなたのハンドを入力してください")
-    playdata = []
-    while(len(playdata) != 2):
-        playdata = input().split()
-    
-    for val in playdata:
-        hoge.set_playercardlist(hoge.convert_cardinfo(val))
-        
-    print("コミュニティカードを入力してください")
-    while(len(playdata) != 5):
-        playdata = input().split()
-    for val in playdata:
-        hoge.set_communitycardlist(hoge.convert_cardinfo(val))
-
-    print(hoge.get_communitycardlist())
-    print(hoge.get_playercardlist())
-    print("------------")
-    phand,phandval,pkicker = hoge.get_playerhand()
-    tmpcard = hoge.put_2cardlist()
-    wincnt = 0
-    losecnt = 0
-    samecnt = 0
-    print("あなたの役")
-    print(phand)
-    print(hoge.show_handname(phandval))
-
-    pbar = tqdm(total = 990)
-    for val in tmpcard: 
-        ehand,ehandval,ekicker = hoge.get_hand(val)
-        if phandval > ehandval:
-            wincnt += 1
-        elif phandval < ehandval:
-            losecnt += 1
-        else:
-            st = hoge.compare_strength(pkicker,ekicker)
-            if st == 0:
-                wincnt += 1
-            elif st == 1:
-                losecnt += 1
-            else:
-                samecnt += 1
-        pbar.update(1)
-    pbar.close()
-    
-    # print((wincnt,losecnt,samecnt))
-    print("勝率")
-    print(wincnt/(wincnt+losecnt+samecnt)*100)
-
 def pturn():
     hoge = PokerCard()
     print("あなたのハンドを入力してください")
